@@ -1,81 +1,55 @@
-"use client";
+import { Activity, ClipboardList, FileText, Image as ImageIcon } from "lucide-react";
 
-import { useEffect, useState } from "react";
-
+import ActivityTimeline from "@/components/ActivityTimeline";
 import AppShell from "@/components/AppShell";
-import { getHealth } from "@/services/api";
-
-type BackendStatus = "checking" | "online" | "offline";
+import QuickActions from "@/components/QuickActions";
+import RecentAssessmentsTable from "@/components/RecentAssessmentsTable";
+import StatCard from "@/components/StatCard";
+import SystemStatusPanel from "@/components/SystemStatusPanel";
+import WelcomeSection from "@/components/WelcomeSection";
 
 export default function Home() {
-  const [backendStatus, setBackendStatus] =
-    useState<BackendStatus>("checking");
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function checkBackendStatus() {
-      try {
-        await getHealth();
-
-        if (isMounted) {
-          setBackendStatus("online");
-        }
-      } catch {
-        if (isMounted) {
-          setBackendStatus("offline");
-        }
-      }
-    }
-
-    checkBackendStatus();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
   return (
     <AppShell>
-      <div className="space-y-8">
-        <div>
-          <h2 className="font-display text-3xl font-semibold text-ink">
-            Dashboard
-          </h2>
+      <div className="flex flex-col gap-8">
+        <WelcomeSection />
 
-          <p className="mt-3 max-w-2xl font-body text-base text-muted">
-            Welcome to DisasterVision. This application shell will host future
-            disaster assessment workflows.
-          </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            label="Total Assessments"
+            value="156"
+            icon={ClipboardList}
+          />
+          <StatCard
+            label="Images Processed"
+            value="842"
+            icon={ImageIcon}
+          />
+          <StatCard
+            label="Reports Generated"
+            value="218"
+            icon={FileText}
+          />
+          <StatCard
+            label="System Health"
+            value="Online"
+            icon={Activity}
+            showIndicator
+          />
         </div>
 
-        <section className="rounded-lg border border-border bg-surface p-6">
-          <p className="font-mono text-xs font-medium uppercase tracking-widest text-muted">
-            System Status
-          </p>
+        <QuickActions />
 
-          <div className="mt-4 flex items-center gap-3">
-            <span
-              className={`h-2.5 w-2.5 rounded-full ${
-                backendStatus === "online"
-                  ? "bg-geo"
-                  : backendStatus === "offline"
-                    ? "bg-signal"
-                    : "bg-border"
-              }`}
-            />
-
-            <span className="font-body text-sm font-medium text-ink">
-              Backend
-            </span>
-
-            <span className="font-mono text-sm text-muted">
-              {backendStatus === "checking" && "Checking..."}
-              {backendStatus === "online" && "Online"}
-              {backendStatus === "offline" && "Offline"}
-            </span>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <RecentAssessmentsTable />
           </div>
-        </section>
+
+          <div className="flex flex-col gap-6">
+            <SystemStatusPanel />
+            <ActivityTimeline />
+          </div>
+        </div>
       </div>
     </AppShell>
   );
