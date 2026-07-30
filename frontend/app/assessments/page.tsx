@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { AlertCircle, RotateCw } from "lucide-react";
 import AssessmentHeader from "@/components/assessment/AssessmentHeader";
 import AssessmentToolbar from "@/components/assessment/AssessmentToolbar";
 import AssessmentTable from "@/components/assessment/AssessmentTable";
 import AssessmentPagination from "@/components/assessment/AssessmentPagination";
-import { fetchAssessments, deleteAssessmentById } from "@/services/assessment.mock";
+import { fetchAssessments, deleteAssessment, ApiError } from "@/services/assessment";
 import { Assessment, AssessmentFilters, PaginationState } from "@/types/assessment";
 import { DEFAULT_PAGE_SIZE } from "@/constants/assessment";
 
@@ -24,15 +25,28 @@ export default function AssessmentsPage() {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [filters, setFilters] = useState<AssessmentFilters>(INITIAL_FILTERS);
   const [pagination, setPagination] = useState<PaginationState>(INITIAL_PAGINATION);
 
   const loadAssessments = useCallback(async () => {
     setIsLoading(true);
-    const result = await fetchAssessments(filters, pagination);
-    setAssessments(result.data);
-    setTotal(result.total);
-    setIsLoading(false);
+    setLoadError(null);
+    try {
+      const result = await fetchAssessments(filters, pagination);
+      setAssessments(result.data);
+      setTotal(result.total);
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : "Something went wrong loading assessments.";
+      setLoadError(message);
+      setAssessments([]);
+      setTotal(0);
+    } finally {
+      setIsLoading(false);
+    }
   }, [filters, pagination]);
 
   useEffect(() => {
@@ -53,8 +67,16 @@ export default function AssessmentsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteAssessmentById(id);
-    await loadAssessments();
+    try {
+      await deleteAssessment(id);
+      await loadAssessments();
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : "Failed to delete the assessment.";
+      setLoadError(message);
+    }
   };
 
   return (
@@ -67,6 +89,23 @@ export default function AssessmentsPage() {
         onRefresh={loadAssessments}
       />
 
+      {loadError && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{loadError}</span>
+          </div>
+          <button
+            type="button"
+            onClick={loadAssessments}
+            className="flex items-center gap-1.5 rounded-md border border-red-300 bg-white px-2.5 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100"
+          >
+            <RotateCw className="h-3.5 w-3.5" />
+            Retry
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-col gap-3">
         <AssessmentTable
           assessments={assessments}
@@ -74,7 +113,7 @@ export default function AssessmentsPage() {
           onDelete={handleDelete}
         />
 
-        {!isLoading && total > 0 && (
+        {!isLoading && !loadError && total > 0 && (
           <AssessmentPagination
             page={pagination.page}
             pageSize={pagination.pageSize}

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ClipboardList } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ClipboardList, AlertCircle } from "lucide-react";
 import AssessmentForm from "@/components/assessment/AssessmentForm";
 import ImageUploadBox from "@/components/assessment/ImageUploadBox";
 import UploadProgress from "@/components/assessment/UploadProgress";
-import SuccessMessage from "@/components/assessment/SuccessMessage";
-import { validateImageFile, SIMULATED_ANALYSIS_DELAY_MS } from "@/constants/assessment";
+import { validateImageFile, buildDefaultAssessmentTitle } from "@/constants/assessment";
+import { createAssessment, ApiError } from "@/services/assessment";
 import {
   AssessmentFormData,
   FormErrors,
@@ -19,9 +20,10 @@ const INITIAL_FORM_DATA: AssessmentFormData = {
   description: "",
 };
 
-type ViewState = "form" | "loading" | "success";
+type ViewState = "form" | "loading";
 
 export default function NewAssessmentPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState<AssessmentFormData>(INITIAL_FORM_DATA);
   const [beforeImage, setBeforeImage] = useState<UploadedImage | null>(null);
   const [afterImage, setAfterImage] = useState<UploadedImage | null>(null);
@@ -82,18 +84,35 @@ export default function NewAssessmentPage() {
     setErrors({});
   };
 
-  const handleStartAssessment = () => {
+  const handleStartAssessment = async () => {
     if (!validate()) return;
 
+    setErrors((prev) => ({ ...prev, submit: undefined }));
     setViewState("loading");
-    setTimeout(() => {
-      setViewState("success");
-    }, SIMULATED_ANALYSIS_DELAY_MS);
-  };
 
-  const handleCreateAnother = () => {
-    handleCancel();
-    setViewState("form");
+    try {
+      // formData.disasterType is guaranteed non-empty past validate()
+      const disasterType = formData.disasterType as Exclude
+        AssessmentFormData["disasterType"],
+        ""
+      >;
+
+      await createAssessment({
+        title: buildDefaultAssessmentTitle(disasterType, formData.location),
+        description: formData.description,
+        location: formData.location,
+        disaster_type: disasterType,
+      });
+
+      router.push("/assessments");
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : "Something went wrong submitting this assessment.";
+      setErrors((prev) => ({ ...prev, submit: message }));
+      setViewState("form");
+    }
   };
 
   return (
@@ -113,13 +132,8 @@ export default function NewAssessmentPage() {
         </div>
       </div>
 
-      {viewState === "loading" && <UploadProgress message="Preparing assessment for analysis..." />}
-
-      {viewState === "success" && (
-        <SuccessMessage
-          message="This assessment is ready for analysis."
-          onCreateAnother={handleCreateAnother}
-        />
+      {viewState === "loading" && (
+        <UploadProgress message="Submitting assessment..." />
       )}
 
       {viewState === "form" && (
@@ -148,6 +162,13 @@ export default function NewAssessmentPage() {
             errors={errors}
             onChange={setFormData}
           />
+
+          {errors.submit && (
+            <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span>{errors.submit}</span>
+            </div>
+          )}
 
           <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-end">
             <button

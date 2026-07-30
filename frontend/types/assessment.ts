@@ -30,11 +30,8 @@ export interface FormErrors {
   description?: string;
   beforeImage?: string;
   afterImage?: string;
+  submit?: string;
 }
-
-/* ---------------------------------------------------------------------- */
-/* Milestone 4 — Assessment Management additions                          */
-/* ---------------------------------------------------------------------- */
 
 export type AssessmentStatus =
   | "pending"
@@ -42,7 +39,6 @@ export type AssessmentStatus =
   | "completed"
   | "archived";
 
-// Mirrors the backend Assessment model exactly (POST/GET /assessments)
 export interface Assessment {
   id: string;
   title: string;

@@ -35,10 +35,6 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
   return { valid: true };
 }
 
-/* ---------------------------------------------------------------------- */
-/* Milestone 4 — Assessment Management additions                          */
-/* ---------------------------------------------------------------------- */
-
 export const ASSESSMENT_STATUS_OPTIONS: {
   value: AssessmentStatus | "all";
   label: string;
@@ -75,3 +71,15 @@ export const STATUS_LABEL_MAP: Record<AssessmentStatus, string> = {
   completed: "Completed",
   archived: "Archived",
 };
+
+/**
+ * The Upload form doesn't collect a title, but the backend Assessment
+ * model requires one. This derives a readable default. Flagged as a
+ * product decision worth revisiting if a real title field is wanted.
+ */
+export function buildDefaultAssessmentTitle(
+  disasterType: DisasterType,
+  location: string
+): string {
+  return `${DISASTER_TYPE_LABEL_MAP[disasterType]} Assessment — ${location}`;
+}

@@ -1,15 +1,6 @@
-"use client";
-
-import { useRouter } from "next/navigation";
 import { QUICK_ACTIONS } from "@/constants/dashboard";
 
-const ACTION_ROUTES: Record<string, string> = {
-  "Upload Assessment": "/assessments/new",
-};
-
 export default function QuickActions() {
-  const router = useRouter();
-
   return (
     <div>
       <h3 className="font-display text-base font-semibold text-ink">
@@ -19,13 +10,11 @@ export default function QuickActions() {
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {QUICK_ACTIONS.map((action) => {
           const Icon = action.icon;
-          const route = ACTION_ROUTES[action.label];
 
           return (
             <button
               key={action.label}
               type="button"
-              onClick={route ? () => router.push(route) : undefined}
               className="flex flex-col items-start gap-3 rounded-xl border border-border bg-surface p-5 text-left shadow-sm hover:border-ink/20 hover:shadow-md"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-background">
