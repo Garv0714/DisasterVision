@@ -1,4 +1,4 @@
-import { DisasterType } from "@/types/assessment";
+import { AssessmentStatus, DisasterType, SortOption } from "@/types/assessment";
 
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
@@ -34,3 +34,44 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
 
   return { valid: true };
 }
+
+/* ---------------------------------------------------------------------- */
+/* Milestone 4 — Assessment Management additions                          */
+/* ---------------------------------------------------------------------- */
+
+export const ASSESSMENT_STATUS_OPTIONS: {
+  value: AssessmentStatus | "all";
+  label: string;
+}[] = [
+  { value: "all", label: "All Statuses" },
+  { value: "pending", label: "Pending" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "completed", label: "Completed" },
+  { value: "archived", label: "Archived" },
+];
+
+export const SORT_OPTIONS: SortOption[] = [
+  { value: "created_desc", label: "Newest First", field: "created_at", direction: "desc" },
+  { value: "created_asc", label: "Oldest First", field: "created_at", direction: "asc" },
+  { value: "updated_desc", label: "Recently Updated", field: "updated_at", direction: "desc" },
+  { value: "title_asc", label: "Title (A-Z)", field: "title", direction: "asc" },
+];
+
+export const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
+
+export const DEFAULT_PAGE_SIZE = 10;
+
+export const SIMULATED_FETCH_DELAY_MS = 600;
+
+export const DISASTER_TYPE_LABEL_MAP: Record<DisasterType, string> =
+  DISASTER_TYPE_OPTIONS.reduce(
+    (acc, option) => ({ ...acc, [option.value]: option.label }),
+    {} as Record<DisasterType, string>
+  );
+
+export const STATUS_LABEL_MAP: Record<AssessmentStatus, string> = {
+  pending: "Pending",
+  in_progress: "In Progress",
+  completed: "Completed",
+  archived: "Archived",
+};

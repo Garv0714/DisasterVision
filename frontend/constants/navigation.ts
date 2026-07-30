@@ -1,17 +1,23 @@
-import {
-  BarChart3,
-  ClipboardList,
-  FileText,
-  LayoutDashboard,
-  Settings,
-} from "lucide-react";
+import { LayoutDashboard, ClipboardList, LucideIcon } from "lucide-react";
 
-import type { NavItem } from "@/types/navigation";
+export interface NavItem {
+  id: string;
+  label: string;
+  href: string;
+  icon: LucideIcon;
+}
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Assessments", icon: ClipboardList },
-  { label: "Analysis", icon: BarChart3 },
-  { label: "Reports", icon: FileText },
-  { label: "Settings", icon: Settings },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    href: "/",
+    icon: LayoutDashboard,
+  },
+  {
+    id: "assessments",
+    label: "Assessments",
+    href: "/assessments",
+    icon: ClipboardList,
+  },
 ];

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { NAV_ITEMS } from "@/constants/navigation";
 
@@ -12,6 +13,7 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children }: AppShellProps) {
+  const router = useRouter();
   const [activeItem, setActiveItem] = useState<string>(NAV_ITEMS[0].label);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
 
@@ -22,6 +24,11 @@ export default function AppShell({ children }: AppShellProps) {
         onSelect={(label) => {
           setActiveItem(label);
           setIsMobileNavOpen(false);
+
+          const item = NAV_ITEMS.find((navItem) => navItem.label === label);
+          if (item) {
+            router.push(item.href);
+          }
         }}
         isMobileOpen={isMobileNavOpen}
         onClose={() => setIsMobileNavOpen(false)}
