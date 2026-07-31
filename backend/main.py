@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.assessments import router as assessments_router
 from api.images import router as images_router
+from api.analysis import router as analysis_router
 from api.health import router as health_router
 from core.config import ALLOWED_ORIGINS, PROJECT_NAME, VERSION
 from core.exceptions import register_exception_handlers
@@ -37,6 +38,8 @@ ensure_storage_directories()
 app.include_router(health_router)
 app.include_router(assessments_router)
 app.include_router(images_router)
+app.include_router(analysis_router)
+
 
 @app.get("/")
 async def get_root() -> dict[str, str]:
